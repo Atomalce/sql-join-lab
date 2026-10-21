@@ -228,3 +228,16 @@ export function sqlFor(mode) {
       throw new Error(`未知的 mode: ${mode}`);
   }
 }
+
+/**
+ * 模拟 LEFT JOIN ... GROUP BY ... HAVING COUNT(o.id) > 0。
+ * 这里只保留至少匹配一笔已支付订单的用户组，返回每组的订单数量。
+ */
+export function aggregatePaidUsers(users, orders) {
+  const groups = [];
+  for (const user of users) {
+    const paidCount = matchedOrders(user, orders).filter(isPaid).length;
+    if (paidCount > 0) groups.push({userId: user.id, name: user.name, paidCount});
+  }
+  return groups;
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runJoin,sqlFor} from './core.js';
+import {aggregatePaidUsers,runJoin,sqlFor} from './core.js';
 const users=[{id:1,name:'林'},{id:2,name:'周'},{id:3,name:'陈'},{id:4,name:'吴'}];
 const orders=[{id:101,userId:1,status:'paid'},{id:102,userId:1,status:'unpaid'},{id:103,userId:2,status:'unpaid'},{id:104,userId:4,status:null},{id:105,userId:99,status:'paid'}];
 test('default result IDs and NULL padding match intended relational cases',()=>{
@@ -23,3 +23,8 @@ test('NULL join keys do not match each other; real NULL status differs from padd
  const row=runJoin(users,orders,'all').find(r=>r.orderId===104);assert.equal(row.status,null);assert.equal(row.padded,false);
 });
 test('unknown modes fail explicitly',()=>{assert.throws(()=>runJoin(users,orders,'bad'));assert.throws(()=>sqlFor('bad'));});
+test('HAVING keeps only groups with paid orders',()=>{
+ assert.deepEqual(aggregatePaidUsers(users,orders),[{userId:1,name:'林',paidCount:1}]);
+ assert.deepEqual(aggregatePaidUsers(users,[...orders,{id:106,userId:1,status:'paid'}]),[{userId:1,name:'林',paidCount:2}]);
+ assert.deepEqual(aggregatePaidUsers(users,orders.map(o=>({...o,status:null}))),[]);
+});

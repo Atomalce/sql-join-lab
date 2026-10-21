@@ -4,3 +4,5 @@
 .inputs,.experiment{min-width:0}select{font-family:inherit;font-size:13px}@media(max-width:760px){.bench{grid-template-columns:minmax(0,1fr)}}
 
 @media(max-width:760px){.equation{position:static;margin-top:8px}}
+
+.aggregate{margin:42px 0 12px;padding:28px;background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 40px #29203f07}.aggregate-copy{display:grid;grid-template-columns:1fr 1.25fr;gap:24px;align-items:start}.aggregate-copy p{font-size:14px;color:var(--muted);margin:0}.aggregate-copy code{font:12px Consolas,monospace;color:var(--purple)}.aggregate .query{min-height:0;border-radius:9px;padding:15px;font-size:12px}.aggregate .table-wrap{margin-top:20px}.aggregate .section-title{margin-bottom:16px}@media(max-width:760px){.aggregate{padding:20px 16px}.aggregate-copy{grid-template-columns:1fr}.aggregate .query{font-size:11px}}

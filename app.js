@@ -1,4 +1,4 @@
-import {runJoin,sqlFor} from './core.js';
+import {aggregatePaidUsers,runJoin,sqlFor} from './core.js';
 const users=[{id:1,name:'小林'},{id:2,name:'小周'},{id:3,name:'小陈'},{id:4,name:'小吴'}];
 const baseOrders=[{id:101,userId:1,status:'paid'},{id:102,userId:1,status:'unpaid'},{id:103,userId:2,status:'unpaid'},{id:104,userId:4,status:null},{id:105,userId:99,status:'paid'}];
 const modes={all:'不加筛选',on:'放在 ON',where:'放在 WHERE',orNull:'WHERE + IS NULL',inner:'INNER JOIN'};
@@ -23,6 +23,7 @@ function render(){
  $('verdict-title').textContent=details[mode][0];$('explanation').textContent=details[mode][1];const missing=users.filter(u=>!kept.has(u.id));$('missing').textContent=missing.length?'未进入结果：'+missing.map(u=>u.name).join('、'):'四个用户都在结果中。';
  $('count-all').textContent=results.length;$('count-id').textContent=results.filter(r=>r.orderId!==null).length;
  $('comparison').replaceChildren();for(const [key,label] of Object.entries(modes)){const rows=runJoin(users,orders,key),tr=row($('comparison'));if(key===mode)tr.className='active-compare';const td=cell(tr,'');const b=document.createElement('button');b.className='compare-button';b.textContent=label;b.setAttribute('aria-label','查看'+label+'的结果');b.addEventListener('click',()=>{mode=key;render();});td.append(b);cell(tr,rows.length);cell(tr,new Set(rows.map(r=>r.userId)).size+' / 4');cell(tr,rows.filter(r=>r.padded).length);}
+ const aggregate=aggregatePaidUsers(users,orders);$('aggregate-results').replaceChildren();for(const group of aggregate){const tr=row($('aggregate-results'));cell(tr,group.userId);cell(tr,group.name);cell(tr,group.paidCount);cell(tr,'HAVING 通过','source');}if(!aggregate.length){const td=cell(row($('aggregate-results')),'没有组通过 HAVING。','empty');td.colSpan=4;}$('aggregate-note').textContent=aggregate.length?`当前保留 ${aggregate.length} 个用户组；仅未支付、无订单或 NULL 状态的组会被过滤。`:'当前没有已支付订单组，HAVING 过滤掉全部结果。';
 }
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render();}));
 $('scenario').addEventListener('change',e=>{const scenario=e.target.value;orders=scenario==='empty'?[]:baseOrders.map(o=>({...o,status:scenario==='nulls'?null:o.status}));if(scenario==='multiple')orders.push({id:106,userId:1,status:'paid'});render();});
